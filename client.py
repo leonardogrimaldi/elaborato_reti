@@ -1,8 +1,18 @@
 import socket
 
 # ICMP types
-ECHO_REPLY = 0
-ECHO = 8 
+TYPE_ECHO_REPLY = 0
+TYPE_ECHO_REQUEST = 8
+# ICMP codes
+CODE_ECHO_REPLY = 0
+CODE_ECHO_REQUEST = 0
 def ping(destinationHost):
-    type = ECHO_REPLY
+    type = TYPE_ECHO_REQUEST
+    code = CODE_ECHO_REPLY
+
+
+
+
+def checksum():
+    return None
     
