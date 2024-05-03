@@ -18,7 +18,8 @@ def printICMP(packet):
     print("Identifier " + packet[32:48])
     print("Sequence number " + packet[48:64])
     print("Data: " + packet[64:])
-
+def ICMPchecksum(packet):
+    bitArr = BitArray(bytes=packet)
 def ping(mySocket, destinationHost, identifier, sequenceNumber):
     type = TYPE_ECHO_REQUEST
     code = CODE_ECHO_REQUEST
@@ -32,19 +33,19 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     packet = header + data
 
     #bitArr = BitArray(bytes=packet)
+    #ICMPchecksum(packet)
     #printICMP(bitArr.bin)
 
     destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP
     print(destIP)
     bytesSent = mySocket.sendto(packet, (destIP, 1))
     print("ICMP bytes sent: ", bytesSent)
-def checksum():
-    return None
-
 def main():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
-    for _ in range(4):
-        ping(mySocket, "google.com",0,0)
+    myID = os.getpid()
+    for i in range(4):
+        print(i)
+        ping(mySocket, "google.com",myID, i)
     
 
 main()
