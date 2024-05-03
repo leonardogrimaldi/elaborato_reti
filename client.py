@@ -35,15 +35,17 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     #printICMP(bitArr.bin)
 
     destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP
-    
-    mySocket.sendto(packet, (destIP, 1))
-
+    print(destIP)
+    bytesSent = mySocket.sendto(packet, (destIP, 1))
+    print("ICMP bytes sent: ", bytesSent)
 def checksum():
     return None
 
 def main():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
-    ping(mySocket, "google.com",0,0)
+    for _ in range(4):
+        ping(mySocket, "google.com",0,0)
+    
 
 main()
 
