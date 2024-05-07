@@ -26,7 +26,6 @@ def ICMPchecksum(packet):
         next = int.from_bytes(temp[i:i+2],byteorder='big')
         sum += next
     checksum = ~sum
-    print("CHECKSUM: ", hex(checksum))
     return checksum
 
 def ping(mySocket, destinationHost, identifier, sequenceNumber):
@@ -36,8 +35,6 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     # struct.pack('!10s', ...) dice quindi di usare 10 byte 
     data = struct.pack('!' + str(len(DATA)) + 's', DATA.encode()) # encode() uses UTF-8 encoding by default.
     packet = header + data
-
-    #bitArr = BitArray(bytes=packet)
     chk = ICMPchecksum(packet)
     header = struct.pack('!BBiHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
     packet = header + data 
