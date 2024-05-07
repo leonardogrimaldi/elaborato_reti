@@ -6,7 +6,7 @@ TYPE_ECHO_REQUEST = 8
 # ICMP codes
 CODE_ECHO_REPLY = 0
 CODE_ECHO_REQUEST = 0
-DATA = "!" # UTF-8
+DATA = "!!" # UTF-8
 
 def printICMP(packet):
     print(packet)
@@ -17,18 +17,17 @@ def printICMP(packet):
     print("Sequence number ", packet[6:8])
     print("Data: ", packet[8:])
 def ICMPchecksum(packet):
-    printICMP(packet)
-    if len(packet) % 2 != 0:
-        packet = bytearray(packet)
-        packet.append(0)
-        printICMP(packet)
-    first = int.from_bytes(packet[0:2], byteorder='big')
-    res = first
-    for i in range(2, len(packet) - 2):
-        next = int.from_bytes(packet[i:i+2],byteorder='big')
-        sum = res + next
-        i += 2
-    print("CHECKSUM IN DECIMAL", ~res)
+    temp = packet
+    if len(temp) % 2 != 0:
+        temp += bytes([0])
+    first = int.from_bytes(temp[0:2], byteorder='big')
+    sum = first
+    for i in range(2, len(temp) - 1, 2):
+        next = int.from_bytes(temp[i:i+2],byteorder='big')
+        sum += next
+    checksum = ~sum
+    print("CHECKSUM: ", hex(checksum))
+    return checksum
 
 def ping(mySocket, destinationHost, identifier, sequenceNumber):
     checksum = 0
@@ -40,7 +39,8 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
 
     #bitArr = BitArray(bytes=packet)
     chk = ICMPchecksum(packet)
-
+    header = struct.pack('!BBiHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
+    packet = header + data 
     destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP
     print(destIP)
     bytesSent = mySocket.sendto(packet, (destIP, 1))
