@@ -25,7 +25,7 @@ def ICMPchecksum(packet):
     for i in range(2, len(temp) - 1, 2):
         next = int.from_bytes(temp[i:i+2],byteorder='big')
         sum += next
-    checksum = ~sum
+    checksum = ~sum & 0xFFFF
     return checksum
 
 def ping(mySocket, destinationHost, identifier, sequenceNumber):
@@ -36,7 +36,7 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     data = struct.pack('!' + str(len(DATA)) + 's', DATA.encode()) # encode() uses UTF-8 encoding by default.
     packet = header + data
     chk = ICMPchecksum(packet)
-    header = struct.pack('!BBiHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
+    header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
     packet = header + data 
     destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP
     print(destIP)
@@ -49,7 +49,6 @@ def main():
     for i in range(4):
         print(i)
         ping(mySocket, "google.com",myID, i)
-    
 
 main()
 
