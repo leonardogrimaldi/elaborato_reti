@@ -42,6 +42,9 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     print(destIP)
     bytesSent = mySocket.sendto(packet, (destIP, 1))
     print("ICMP bytes sent: ", bytesSent)
+# Timeout is in seconds
+def receive_reply(mySocket, identifier, timeout):
+    timeleft = timeout
 def main():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
     myID = os.getpid() & 0xFFFF  # tronca a 16 bit
