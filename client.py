@@ -41,9 +41,9 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
     packet = header + data 
     destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP
-    print("Destination: ", destIP)
+    sentTime = time.time()
     bytesSent = mySocket.sendto(packet, (destIP, 1))
-    print("ICMP bytes sent: ", bytesSent)
+    return bytesSent, sentTime
 # Timeout is in seconds
 def receive_reply(mySocket, myID, timeout):
     timeLeft = timeout
@@ -54,7 +54,7 @@ def receive_reply(mySocket, myID, timeout):
         selectTime = (time.time() - startedSelect)
         # select timeout case
         if not (readable or writeable or exceptional):
-            return None
+            return None, None, None, None, None 
         timeReceived = time.time()
         packet, address = mySocket.recvfrom(ICMP_MAX_RECV)
         ipHeader = packet[:20]
@@ -70,19 +70,24 @@ def receive_reply(mySocket, myID, timeout):
             return timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL
         timeLeft = timeLeft - selectTime
         if timeLeft <= 0:
-            return None
-def main():
+            return None, None, None, None, None
+def do_one(hostName, myID, seqNumber, timeout):
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
-    myID = os.getpid() & 0xFFFF  # tronca a 16 bit
-    for i in range(4):
-        print(i)
-        ping(mySocket, "google.com",myID, i)
-    timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL = receive_reply(mySocket, myID, 5)
+    bytesSent, sentTime = ping(mySocket, hostName, myID, seqNumber)
+    print("ICMP bytes sent: ", bytesSent)
+    timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL = receive_reply(mySocket, myID, timeout)
+    mySocket.close()
     if timeReceived is not None:
-        delay = 0
+        delay = (timeReceived - sentTime) * 1000
         print("%d bytes from %s: icmp_seq=%d ttl=%d time=%d ms" % (
             dataSize, socket.inet_ntoa(struct.pack("!I", iphSrcIP)), icmpSeqNumber, iphTTL, delay)
         )
+    
+def main():
+    timeout = 5 # secondi
+    myID = os.getpid() & 0xFFFF  # tronca a 16 bit
+    for i in range(4):
+        do_one("google.com", myID, i, timeout)
 main()
 
     
