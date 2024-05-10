@@ -77,7 +77,12 @@ def main():
     for i in range(4):
         print(i)
         ping(mySocket, "google.com",myID, i)
-    receive_reply(mySocket, myID, 5)
+    timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL = receive_reply(mySocket, myID, 5)
+    if timeReceived is not None:
+        delay = 0
+        print("%d bytes from %s: icmp_seq=%d ttl=%d time=%d ms" % (
+            dataSize, socket.inet_ntoa(struct.pack("!I", iphSrcIP)), icmpSeqNumber, iphTTL, delay)
+        )
 main()
 
     
