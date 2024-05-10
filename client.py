@@ -45,18 +45,32 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     bytesSent = mySocket.sendto(packet, (destIP, 1))
     print("ICMP bytes sent: ", bytesSent)
 # Timeout is in seconds
-def receive_reply(mySocket, identifier, timeout):
+def receive_reply(mySocket, myID, timeout):
     timeLeft = timeout
     while True:
         startedSelect = time.time()
         # aspetto che il 'mySocket' sia in stato read ovvero ricezione pachetti
         readable, writeable, exceptional = select.select([mySocket], [], [], timeout)
+        selectTime = (time.time() - startedSelect)
         # select timeout case
         if not (readable or writeable or exceptional):
             return None
         timeReceived = time.time()
         packet, address = mySocket.recvfrom(ICMP_MAX_RECV)
-
+        ipHeader = packet[:20]
+        (iphVersion, iphTypeOfSvc, iphLength, iphID, iphFlags, iphTTL,
+         iphProtocol, iphChecksum, iphSrcIP, iphDestIP) = struct.unpack("!BBHHHBBHII", ipHeader)
+        icmpHeader = packet[20:28]
+        icmpType, icmpCode, icmpChecksum, \
+        icmpPacketID, icmpSeqNumber = struct.unpack(
+            "!BBHHH", icmpHeader
+        )
+        if icmpPacketID == myID: # Our packet
+            dataSize = len(packet) - 28
+            return timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL
+        timeLeft = timeLeft - selectTime
+        if timeLeft <= 0:
+            return None
 def main():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
     myID = os.getpid() & 0xFFFF  # tronca a 16 bit
