@@ -39,11 +39,19 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     packet = header + data
     chk = ICMPchecksum(packet)
     header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
-    packet = header + data 
-    destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP
-    sentTime = time.time()
-    bytesSent = mySocket.sendto(packet, (destIP, 1))
-    return bytesSent, sentTime
+    packet = header + data
+    try:
+        destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP
+    except:
+        raise ValueError("Non è stato possibile trovare l'IP del hostname inserito")
+    else:
+        sentTime = time.time()
+        try:
+            bytesSent = mySocket.sendto(packet, (destIP, 1))
+        except socket.error as e:
+            print("Errore socket", e)
+            raise socket.error
+        return bytesSent, sentTime
 # Timeout is in seconds
 def receive_reply(mySocket, myID, timeout):
     timeLeft = timeout
@@ -73,21 +81,28 @@ def receive_reply(mySocket, myID, timeout):
             return None, None, None, None, None
 def do_one(hostName, myID, seqNumber, timeout):
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
-    bytesSent, sentTime = ping(mySocket, hostName, myID, seqNumber)
-    print("ICMP bytes sent: ", bytesSent)
-    timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL = receive_reply(mySocket, myID, timeout)
-    mySocket.close()
-    if timeReceived is not None:
-        delay = (timeReceived - sentTime) * 1000
-        print("%d bytes from %s: icmp_seq=%d ttl=%d time=%d ms" % (
-            dataSize, socket.inet_ntoa(struct.pack("!I", iphSrcIP)), icmpSeqNumber, iphTTL, delay)
-        )
+    try:
+        bytesSent, sentTime = ping(mySocket, hostName, myID, seqNumber)
+    except ValueError as e:
+        print("Pacchetto non inviato.", e)
+    else:  
+        print("Byte ICMP inviati: ", bytesSent)
+        timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL = receive_reply(mySocket, myID, timeout)
+        mySocket.close()
+        if timeReceived is not None:
+            delay = (timeReceived - sentTime) * 1000
+            print("%d byte da %s: icmp_seq=%d ttl=%d tempo=%d ms" % (
+                dataSize, socket.inet_ntoa(struct.pack("!I", iphSrcIP)), icmpSeqNumber, iphTTL, delay)
+            )
     
 def main():
-    timeout = 5 # secondi
-    myID = os.getpid() & 0xFFFF  # tronca a 16 bit
-    for i in range(4):
-        do_one("google.com", myID, i, timeout)
+    while True:
+        hostName = input("Inserisci l'indirizzo IP o hostname del destinatario.\n")
+        timeout = 5 # secondi
+        myID = os.getpid() & 0xFFFF  # tronca a 16 bit
+        times = 4   # quante volte eseguire ping
+        for i in range(times):
+            do_one(hostName, myID, i, timeout)
 main()
 
     
