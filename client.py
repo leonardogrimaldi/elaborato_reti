@@ -7,7 +7,7 @@ TYPE_ECHO_REQUEST = 8
 # ICMP codes
 CODE_ECHO_REPLY = 0
 CODE_ECHO_REQUEST = 0
-DATA = "!!" # UTF-8
+DATA = "Buongiorno mondo!" # UTF-8
 
 def printICMP(packet):
     print(packet)
@@ -26,7 +26,8 @@ def ICMPchecksum(packet):
     for i in range(2, len(temp) - 1, 2):
         next = int.from_bytes(temp[i:i+2],byteorder='big')
         sum += next
-    checksum = ~sum & 0xFFFF
+    overflow = sum >> 16
+    checksum = ~(sum + overflow) & 0xFFFF
     return checksum
 
 def ping(mySocket, destinationHost, identifier, sequenceNumber):
@@ -83,7 +84,7 @@ def do_one(hostName, myID, seqNumber, timeout):
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
     try:
         bytesSent, sentTime = ping(mySocket, hostName, myID, seqNumber)
-    except ValueError as e:
+    except (ValueError, socket.error) as e:
         print("Pacchetto non inviato.", e)
     else:  
         print("Byte ICMP inviati: ", bytesSent)
@@ -94,7 +95,6 @@ def do_one(hostName, myID, seqNumber, timeout):
             print("%d byte da %s: icmp_seq=%d ttl=%d tempo=%d ms" % (
                 dataSize, socket.inet_ntoa(struct.pack("!I", iphSrcIP)), icmpSeqNumber, iphTTL, delay)
             )
-    
 def main():
     while True:
         hostName = input("Inserisci l'indirizzo IP o hostname del destinatario.\n")
@@ -104,5 +104,3 @@ def main():
         for i in range(times):
             do_one(hostName, myID, i, timeout)
 main()
-
-    
