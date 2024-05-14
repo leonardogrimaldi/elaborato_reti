@@ -8,27 +8,6 @@
 \usepackage{color}
 \usepackage{minted}
 
-\definecolor{dkgreen}{rgb}{0,0.6,0}
-\definecolor{gray}{rgb}{0.5,0.5,0.5}
-\definecolor{mauve}{rgb}{0.58,0,0.82}
-
-\lstset{frame=tb,
-  language=Python,
-  aboveskip=3mm,
-  belowskip=3mm,
-  showstringspaces=false,
-  columns=flexible,
-  basicstyle={\small\ttfamily},
-  numbers=none,
-  numberstyle=\tiny\color{gray},
-  keywordstyle=\color{blue},
-  commentstyle=\color{dkgreen},
-  stringstyle=\color{mauve},
-  breaklines=true,
-  breakatwhitespace=true,
-  tabsize=3
-}
-
 % Questo commentalo se vuoi scrivere in inglese.
 \usepackage[italian]{babel}
 
@@ -55,7 +34,7 @@ Nel caso in cui non si riceva una risposta, a schermo verrà solamente stampato 
 Per terminare correttamente lo script su \texttt{Windows} bisogna utilizzare la combinazione di tasti \texttt{CTRL + Break}.
 \section{Codice}
 Il sorgente è composto da tre sezioni principali necessarie per l'implementazione base del \texttt{ping}, che andrò ad elencare e spiegare in dettaglio.
-\subsection*{\texttt{ICMPchecksum(packet)}}
+\subsection{\texttt{ICMPchecksum(packet)}}
 Il codice scritto in questo metodo contiene la logica di calcolo di un checksum ICMP.
 %
 Prende in input un oggetto \texttt{bytes()} e restituisce in output un \texttt{int} con soli 16 bit meno significativi utili.
@@ -85,7 +64,7 @@ In questa porzione di codice vengono presi 2 byte e convertiti in \texttt{int} e
 Si identifica l'\texttt{overflow} prendendo i 16 bit più significativi e lo si aggiunge a \texttt{sum}. Si effettua il complemento a 1 di tale valore con il carattere \texttt{~} e poi si azzerano i primi 16 bit (ridondanti dato che il checksum è a 16 bit mentre l'intero a 32).
 %
 \\ Notare che \textbf{il metodo \texttt{ICMPchecksum} non azzera in alcun modo il campo `checksum' di un pacchetto}, sarà infatti compito del chiamante farlo.
-\subsection*{\texttt{ping(mySocket, destinationHost,\\ identifier, sequenceNumber)}}
+\subsection{\texttt{ping(mySocket, destinationHost,\\ identifier, sequenceNumber)}}
 Viene usato per effettuare un messaggio di Echo request a un destinatario.
 Riceve in input:
 \begin{itemize} 
@@ -128,5 +107,5 @@ In questa porzione si calcola il checksum del pacchetto e lo si ricostruisce ins
   return bytesSent, sentTime
 \end{minted}
 Infine invio il pacchetto usando \texttt{socket.sendto()} e restituisco il tempo di invio e il numero di byte inviati
-\subsection*{\texttt{receive\_reply(mySocket, myID, timeout)}}
+\subsection{\texttt{receive\_reply(mySocket, myID, timeout)}}
 \end{document}
