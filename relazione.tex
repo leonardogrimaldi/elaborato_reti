@@ -89,7 +89,7 @@ Si identifica l'\texttt{overflow} prendendo i 16 bit più significativi e lo si 
 Viene usato per effettuare un messaggio di Echo request a un destinatario.
 Riceve in input:
 \begin{itemize} 
-  \item \texttt{mySocket}: oggetto socket da usare per l'invio del pacchetto
+  \item \texttt{mySocket}: oggetto \texttt{socket} da usare per l'invio del pacchetto
   \item \texttt{destinationHost}: indirizzo IP oppure host name del destinatario
   \item \texttt{identifier}: identificatore del pacchetto da inviare
   \item \texttt{sequenceNumber}: numero di sequenza del pacchetto
@@ -99,10 +99,34 @@ Riceve in input:
   checksum = 0
   header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, checksum, identifier, sequenceNumber)
   # len(data) Ci dà il numero di caratteri nella stringa
+  # esempio: len(data) = 10
   # struct.pack('!10s', ...) dice quindi di usare 10 byte
-  # encode() uses UTF-8 encoding by default. 
+  # encode() usa l'encoding UTF-8 di default. 
   data = struct.pack('!' + str(len(DATA)) + 's', DATA.encode())
   packet = header + data
 \end{minted}
-Prima di inviare il pacchetto lo dobbiamo costruire: teniamo il valore di checksum a 0 e usiamo la funzione \texttt{struct.pack()} per convertire le variabili di Python in oggetti \texttt{bytes()} che sarà successivamente più facile 
+Prima di inviare il pacchetto è necessario costruirlo: usando la funzione \texttt{struct.pack()} è possibile convertire le variabili di Python in oggetti \texttt{bytes()} in modo da manipolarli più facilmente.
+%
+Passando ad essa la format string \texttt{`!BBHHH'} si può indicare come verranno rappresentati i dati letti nei successivi parametri:
+\begin{itemize}
+  \item \texttt{!}: ordine byte network (big endian)
+  \item \texttt{B}: unsigned char (1 byte)
+  \item \texttt{H}: unsigned short (2 byte)
+\end{itemize}
+Elencando successivamente le variabili che formano il pacchetto ICMP (ricordando che il checksum deve essere posto a \texttt{x00} prima che venga calcolato), è possibile ottenere una rappresentazione in \texttt{byte()} del header.
+%
+Alla riga \texttt{9} viene formato il pacchetto accodando i byte di data su quelli di header.
+\begin{minted}[linenos, firstnumber=last, breaklines, breakbytoken]{python3}
+  chk = ICMPchecksum(packet)
+  header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
+  packet = header + data
+\end{minted}
+In questa porzione si calcola il checksum del pacchetto e lo si ricostruisce inserendone il valore ottenuto.
+\begin{minted}[linenos, firstnumber=last, breaklines, breakbytoken]{python3}
+  sentTime = time.time()
+  bytesSent = mySocket.sendto(packet, (destIP, 1))
+  return bytesSent, sentTime
+\end{minted}
+Infine invio il pacchetto usando \texttt{socket.sendto()} e restituisco il tempo di invio e il numero di byte inviati
+\subsection*{\texttt{receive_reply(mySocket, myID, timeout)}}
 \end{document}
