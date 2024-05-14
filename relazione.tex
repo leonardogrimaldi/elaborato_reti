@@ -60,4 +60,23 @@ Il codice scritto in questo metodo contiene la logica di calcolo di un checksum 
 %
 Prende in input un oggetto \texttt{bytes()} e restituisce in output un \texttt{int} con soli 16 bit meno significativi utili.
 %
+\begin{minted}[linenos]{python3}
+  def ICMPchecksum(packet):
+  temp = packet
+  if len(temp) % 2 != 0:
+      temp += bytes([0])
+\end{minted}
+Il pacchetto viene spostato in una variabile di appoggio \texttt{temp} per evitare di modificare il parametro in input e causare inconsistenze nel codice.
+%
+\\ Successivamente viene eseguito un controllo sulla parità: nel caso in cui il numero di byte del pacchetto è dispari, viene aggiunto alla fine un byte \texttt{x00} di padding.
+\begin{minted}[linenos, firstnumber=last]{python3}
+  first = int.from_bytes(temp[0:2], byteorder='big')
+  sum = first
+  for i in range(2, len(temp) - 1, 2):
+      next = int.from_bytes(temp[i:i+2],byteorder='big')
+      sum += next
+  overflow = sum >> 16
+  checksum = ~(sum + overflow) & 0xFFFF
+  return checksum
+\end{minted}
 \end{document}
