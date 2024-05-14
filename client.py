@@ -9,14 +9,6 @@ CODE_ECHO_REPLY = 0
 CODE_ECHO_REQUEST = 0
 DATA = "Buongiorno mondo!" # UTF-8
 
-def printICMP(packet):
-    print(packet)
-    print("Type ", packet[0])
-    print("Code ", packet[1])
-    print("Checksum ", packet[2:4])
-    print("Identifier ", packet[4:6])
-    print("Sequence number ", packet[6:8])
-    print("Data: ", packet[8:])
 def ICMPchecksum(packet):
     temp = packet
     if len(temp) % 2 != 0:
@@ -49,8 +41,7 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
         sentTime = time.time()
         try:
             bytesSent = mySocket.sendto(packet, (destIP, 1))
-        except socket.error as e:
-            print("Errore socket", e)
+        except socket.error:
             raise socket.error
         return bytesSent, sentTime
 # Timeout is in seconds
@@ -74,15 +65,15 @@ def receive_reply(mySocket, myID, timeout):
         icmpPacketID, icmpSeqNumber = struct.unpack(
             "!BBHHH", icmpHeader
         )
-        if icmpPacketID == myID: # Our packet
+        if icmpPacketID == myID: # Nostro pacchetto
             dataSize = len(packet) - 28
             return timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL
         timeLeft = timeLeft - selectTime
         if timeLeft <= 0:
             return None, None, None, None, None
 def do_one(hostName, myID, seqNumber, timeout):
-    mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
     try:
+        mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
         bytesSent, sentTime = ping(mySocket, hostName, myID, seqNumber)
     except (ValueError, socket.error) as e:
         print("Pacchetto non inviato.", e)
@@ -100,7 +91,7 @@ def main():
         hostName = input("Inserisci l'indirizzo IP o hostname del destinatario.\n")
         timeout = 5 # secondi
         myID = os.getpid() & 0xFFFF  # tronca a 16 bit
-        times = 4   # quante volte eseguire ping
+        times = 4   # quante volte eseguire ping sullo stesso hostName
         for i in range(times):
             do_one(hostName, myID, i, timeout)
 main()
