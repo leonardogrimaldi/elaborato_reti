@@ -21,14 +21,13 @@ def ICMPchecksum(packet):
     overflow = sum >> 16
     checksum = ~(sum + overflow) & 0xFFFF
     return checksum
-
 def ping(mySocket, destinationHost, identifier, sequenceNumber):
     checksum = 0
-    # Spiegare nel PDF cosa fa?
     header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, checksum, identifier, sequenceNumber)
     # len(data) Ci dà il numero di caratteri nella stringa
-    # struct.pack('!10s', ...) dice quindi di usare 10 byte 
-    data = struct.pack('!' + str(len(DATA)) + 's', DATA.encode()) # encode() uses UTF-8 encoding by default.
+    # struct.pack('!10s', ...) dice quindi di usare 10 byte
+    # encode() uses UTF-8 encoding by default.
+    data = struct.pack('!' + str(len(DATA)) + 's', DATA.encode())
     packet = header + data
     chk = ICMPchecksum(packet)
     header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
