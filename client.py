@@ -25,15 +25,19 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
     checksum = 0
     header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, checksum, identifier, sequenceNumber)
     # len(data) Ci dà il numero di caratteri nella stringa
+    # esempio: len(data) = 10
     # struct.pack('!10s', ...) dice quindi di usare 10 byte
-    # encode() uses UTF-8 encoding by default.
+    # encode() usa l'encoding UTF-8 di default.
     data = struct.pack('!' + str(len(DATA)) + 's', DATA.encode())
     packet = header + data
+    # Calcolo il checksum del pacchetto
     chk = ICMPchecksum(packet)
+    # Creo l'header con il nuovo checksum
     header = struct.pack('!BBHHH', TYPE_ECHO_REQUEST, CODE_ECHO_REQUEST, chk, identifier, sequenceNumber)
+    # Ricostruisco il pacchetto
     packet = header + data
     try:
-        destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP
+        destIP = socket.gethostbyname(destinationHost)  # traduce l'hostname in IP oppure se è già IP lo lascia invariato
     except:
         raise ValueError("Non è stato possibile trovare l'IP del hostname inserito")
     else:
