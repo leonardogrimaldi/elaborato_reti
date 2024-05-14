@@ -48,5 +48,16 @@ Lo script deve consentire all'utente di specificare gli indirizzi IP degli host 
 \section{Funzionamento}
 All'avvio dello script \texttt{client.py} verrà chiesto all'utente di inserire in console l'hostname (es. \texttt{google.com}) oppure l'indirizzo IP (es. \texttt{8.8.8.8}) della macchina della quale si vuole sapere la disponibilità.
 %
-Qualora arrivi la risposta del destinatario, si otterrà un messaggio del formato: \texttt{17 byte da 216.58.204.238: icmp\_seq=0 ttl=111 tempo=16 ms}, dove il numero di byte è dato dalla dimensione della sezione DATA (nel nostro caso \mintinline{python3}|DATA = "Buongiorno mondo!"|) e il tempo 
+Qualora arrivi la risposta del destinatario, si otterrà un messaggio del formato: \texttt{17 byte da 216.58.204.238: icmp\_seq=0 ttl=111 tempo=16 ms}, dove il numero di byte è dato dalla dimensione della sezione DATA (nel nostro caso \mintinline{python3}|DATA = "Buongiorno mondo!"|) e il tempo indica il delay, ovvero quanto ci ha messo a ricevere la risposta dal tempo di invio.
+%
+Nel caso in cui non si riceva una risposta, a schermo verrà solamente stampato quanti byte sono stati inviati, oppure in casi eccezionali un messaggio di errore.
+%
+Per terminare correttamente lo script su \texttt{Windows} bisogna utilizzare la combinazione di tasti \texttt{CTRL + Break}.
+\section{Codice}
+Il sorgente è composto da tre sezioni principali necessarie per l'implementazione base del \texttt{ping}, che andrò ad elencare e spiegare in dettaglio.
+\subsection*{\texttt{ICMPchecksum(packet)}}
+Il codice scritto in questo metodo contiene la logica di calcolo di un checksum ICMP.
+%
+Prende in input un oggetto \texttt{bytes()} e restituisce in output un \texttt{int} con soli 16 bit meno significativi utili.
+%
 \end{document}
