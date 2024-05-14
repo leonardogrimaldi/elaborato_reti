@@ -1,0 +1,52 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage{alltt, fancyvrb, url}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{minted}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+% Questo commentalo se vuoi scrivere in inglese.
+\usepackage[italian]{babel}
+
+\usepackage[italian]{cleveref}
+\title{Relazione del progetto di Programmazione di Reti 
+    \\ Traccia 3: Monitoraggio di Rete}
+
+\author{Leonardo Grimaldi}
+\date{\today}   
+\begin{document}
+\maketitle
+We have now added a title, author and date to our first \LaTeX{} document!
+\section{Consegna}
+Realizzare uno script Python per monitorare lo stato di una rete, controllando la disponibilità di uno o più host tramite il protocollo ICMP (ping).
+%
+Lo script deve consentire all'utente di specificare gli indirizzi IP degli host da monitorare e deve visualizzare lo stato (online/offline) di ciascun host.
+\section{Funzionamento}
+All'avvio dello script \texttt{client.py} verrà chiesto all'utente di inserire in console l'hostname (es. \texttt{google.com}) oppure l'indirizzo IP (es. \texttt{8.8.8.8}) della macchina della quale si vuole sapere la disponibilità.
+%
+Qualora arrivi la risposta del destinatario, si otterrà un messaggio del formato: \texttt{17 byte da 216.58.204.238: icmp\_seq=0 ttl=111 tempo=16 ms}, dove il numero di byte è dato dalla dimensione della sezione DATA (nel nostro caso \mintinline{python3}|DATA = "Buongiorno mondo!"|) e il tempo 
+\end{document}
