@@ -19,12 +19,12 @@
 \date{\today}   
 \begin{document}
 \maketitle
-We have now added a title, author and date to our first \LaTeX{} document!
-\section{Consegna}
+\tableofcontents
+\chapter{Consegna}
 Realizzare uno script Python per monitorare lo stato di una rete, controllando la disponibilità di uno o più host tramite il protocollo ICMP (ping).
 %
 Lo script deve consentire all'utente di specificare gli indirizzi IP degli host da monitorare e deve visualizzare lo stato (online/offline) di ciascun host.
-\section{Funzionamento}
+\chapter{Funzionamento}
 All'avvio dello script \texttt{client.py} verrà chiesto all'utente di inserire in console l'hostname (es. \texttt{google.com}) oppure l'indirizzo IP (es. \texttt{8.8.8.8}) della macchina della quale si vuole sapere la disponibilità.
 %
 Qualora arrivi la risposta del destinatario, si otterrà un messaggio del formato: \texttt{17 byte da 216.58.204.238: icmp\_seq=0 ttl=111 tempo=16 ms}, dove il numero di byte è dato dalla dimensione della sezione DATA (nel nostro caso \mintinline{python3}|DATA = "Buongiorno mondo!"|) e il tempo indica il delay, ovvero quanto ci ha messo a ricevere la risposta dal tempo di invio.
@@ -32,9 +32,9 @@ Qualora arrivi la risposta del destinatario, si otterrà un messaggio del format
 Nel caso in cui non si riceva una risposta, a schermo verrà solamente stampato quanti byte sono stati inviati, oppure in casi eccezionali un messaggio di errore.
 %
 Per terminare correttamente lo script su \texttt{Windows} bisogna utilizzare la combinazione di tasti \texttt{CTRL + Break}.
-\section{Codice}
+\chapter{Codice}
 Il sorgente è composto da tre sezioni principali necessarie per l'implementazione base del \texttt{ping}, che andrò ad elencare e spiegare in dettaglio.
-\subsection{\texttt{ICMPchecksum(packet)}}
+\section{\texttt{ICMPchecksum(packet)}}
 Il codice scritto in questo metodo contiene la logica di calcolo di un checksum ICMP.
 %
 Prende in input un oggetto \texttt{bytes()} e restituisce in output un \texttt{int} con soli 16 bit meno significativi utili.
@@ -61,10 +61,10 @@ In questa porzione di codice vengono presi 2 byte e convertiti in \texttt{int} e
   checksum = ~(sum + overflow) & 0xFFFF
   return checksum
 \end{minted}
-Si identifica l'\texttt{overflow} prendendo i 16 bit più significativi e lo si aggiunge a \texttt{sum}. Si effettua il complemento a 1 di tale valore con il carattere \texttt{~} e poi si azzerano i primi 16 bit (ridondanti dato che il checksum è a 16 bit mentre l'intero a 32).
+Si identifica l'\texttt{overflow} prendendo i 16 bit più significativi e lo si aggiunge a \texttt{sum}. Si effettua il complemento a 1 di tale valore con il carattere \texttt{\~} e poi si azzerano i primi 16 bit (ridondanti dato che il checksum è a 16 bit mentre l'intero a 32).
 %
 \\ Notare che \textbf{il metodo \texttt{ICMPchecksum} non azzera in alcun modo il campo `checksum' di un pacchetto}, sarà infatti compito del chiamante farlo.
-\subsection{\texttt{ping(mySocket, destinationHost,\\ identifier, sequenceNumber)}}
+\section{\texttt{ping(mySocket, destinationHost, identifier, sequenceNumber)}}
 Viene usato per effettuare un messaggio di Echo request a un destinatario.
 Riceve in input:
 \begin{itemize} 
@@ -107,5 +107,52 @@ In questa porzione si calcola il checksum del pacchetto e lo si ricostruisce ins
   return bytesSent, sentTime
 \end{minted}
 Infine invio il pacchetto usando \texttt{socket.sendto()} e restituisco il tempo di invio e il numero di byte inviati
-\subsection{\texttt{receive\_reply(mySocket, myID, timeout)}}
+\section{\texttt{receive\_reply(mySocket, myID, timeout)}}
+Questo metodo gestisce l'arrivo del pacchetto di risposta ICMP (Echo reply).
+%
+In input riceve l'oggetto \texttt{socket} su cui leggere i pacchetti, l'identificatore \texttt{myID} per verificare che il pacchetto sia nostro e il tempo di attesa \texttt{timeout}.
+%
+\begin{minted}[linenos, breaklines]{python3}
+  def receive_reply(mySocket, myID, timeout):
+  timeLeft = timeout
+  while True:
+      startedSelect = time.time()
+      # aspetto che il 'mySocket' sia in stato read ovvero ricezione pachetti
+      readable, writeable, exceptional = select.select([mySocket], [], [], timeout)
+      selectTime = (time.time() - startedSelect)
+\end{minted}
+Creo un ciclo `infinito' che dovrà ovviamente fermarsi quando è scaduto il mio \texttt{timeout}.
+%
+Aspetto che il socket sia in modalità lettura e in \texttt{selectTime} inserisco il tempo che ci ha messo ad attendere.
+\begin{minted}[linenos, firstnumber=last, breaklines]{python3}
+  # select timeout
+  if not (readable or writeable or exceptional):
+      return None, None, None, None, None 
+  timeReceived = time.time()
+  packet, address = mySocket.recvfrom(ICMP_MAX_RECV)
+\end{minted}
+Gestisco il caso di non leggibilità e continuo estraendo il pacchetto ricevuto con \texttt{socket.recvfrom()}.
+%
+Il parametro \texttt{ICMP\_MAX\_RECV} indica la dimensione del buffer, in questo caso \texttt{2048} bytes, oltre i quali il dato verrà spezzato.
+\begin{minted}[linenos, firstnumber=last, breaklines]{python3}
+  ipHeader = packet[:20]
+  (iphVersion, iphTypeOfSvc, iphLength, iphID, iphFlags, iphTTL,
+   iphProtocol, iphChecksum, iphSrcIP, iphDestIP) = struct.unpack("!BBHHHBBHII", ipHeader)
+  icmpHeader = packet[20:28]
+  icmpType, icmpCode, icmpChecksum, \
+  icmpPacketID, icmpSeqNumber = struct.unpack("!BBHHH", icmpHeader)
+\end{minted}
+Usando \texttt{struct.unpack()} converto i \texttt{bytes()} del \texttt{packet} in variabili Python che potrò tornare e visualizzare più facilmente.
+%
+\begin{minted}[linenos, firstnumber=last, breaklines]{python3}
+  if icmpPacketID == myID: # Nostro pacchetto
+    dataSize = len(packet) - 28
+    return timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL
+  timeLeft = timeLeft - selectTime
+  if timeLeft <= 0:
+    return None, None, None, None, None
+\end{minted}
+Confronto l'ID del pacchetto con il mio (quello per cui devo ricevere la risposta): se la condizione è vera ritorno alcune informazioni relative ad esso.
+%
+Altrimenti, riciclo lo stesso procedimento se non ho ancora superato il tempo \texttt{timeout}.
 \end{document}

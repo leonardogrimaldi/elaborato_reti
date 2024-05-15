@@ -47,7 +47,6 @@ def ping(mySocket, destinationHost, identifier, sequenceNumber):
         except socket.error:
             raise socket.error
         return bytesSent, sentTime
-# Timeout is in seconds
 def receive_reply(mySocket, myID, timeout):
     timeLeft = timeout
     while True:
@@ -55,7 +54,7 @@ def receive_reply(mySocket, myID, timeout):
         # aspetto che il 'mySocket' sia in stato read ovvero ricezione pachetti
         readable, writeable, exceptional = select.select([mySocket], [], [], timeout)
         selectTime = (time.time() - startedSelect)
-        # select timeout case
+        # select timeout
         if not (readable or writeable or exceptional):
             return None, None, None, None, None 
         timeReceived = time.time()
@@ -65,9 +64,7 @@ def receive_reply(mySocket, myID, timeout):
          iphProtocol, iphChecksum, iphSrcIP, iphDestIP) = struct.unpack("!BBHHHBBHII", ipHeader)
         icmpHeader = packet[20:28]
         icmpType, icmpCode, icmpChecksum, \
-        icmpPacketID, icmpSeqNumber = struct.unpack(
-            "!BBHHH", icmpHeader
-        )
+        icmpPacketID, icmpSeqNumber = struct.unpack("!BBHHH", icmpHeader)
         if icmpPacketID == myID: # Nostro pacchetto
             dataSize = len(packet) - 28
             return timeReceived, dataSize, iphSrcIP, icmpSeqNumber, iphTTL
