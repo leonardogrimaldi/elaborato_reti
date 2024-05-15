@@ -64,7 +64,7 @@ In questa porzione di codice vengono presi 2 byte e convertiti in \texttt{int} e
 Si identifica l'\texttt{overflow} prendendo i 16 bit più significativi e lo si aggiunge a \texttt{sum}. Si effettua il complemento a 1 di tale valore con il carattere \texttt{\~} e poi si azzerano i primi 16 bit (ridondanti dato che il checksum è a 16 bit mentre l'intero a 32).
 %
 \\ Notare che \textbf{il metodo \texttt{ICMPchecksum} non azzera in alcun modo il campo `checksum' di un pacchetto}, sarà infatti compito del chiamante farlo.
-\section{\texttt{ping(mySocket, destinationHost, identifier, sequenceNumber)}}
+\section{\texttt{ping(mySocket, destinationHost,\\ identifier, sequenceNumber)}}
 Viene usato per effettuare un messaggio di Echo request a un destinatario.
 Riceve in input:
 \begin{itemize} 
