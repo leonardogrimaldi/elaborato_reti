@@ -4,8 +4,6 @@
 \usepackage[utf8]{inputenc}
 \usepackage{float}
 \usepackage{hyperref}
-\usepackage{listings}
-\usepackage{color}
 \usepackage{minted}
 
 % Questo commentalo se vuoi scrivere in inglese.
@@ -29,11 +27,13 @@ All'avvio dello script \texttt{client.py} verrà chiesto all'utente di inserire 
 %
 Qualora arrivi la risposta del destinatario, si otterrà un messaggio del formato: \texttt{17 byte da 216.58.204.238: icmp\_seq=0 ttl=111 tempo=16 ms}, dove il numero di byte è dato dalla dimensione della sezione DATA (nel nostro caso \mintinline{python3}|DATA = "Buongiorno mondo!"|) e il tempo indica il delay, ovvero quanto ci ha messo a ricevere la risposta dal tempo di invio.
 %
-Nel caso in cui non si riceva una risposta, a schermo verrà solamente stampato quanti byte sono stati inviati, oppure in casi eccezionali un messaggio di errore.
+Alla fine dell'invio dei \texttt{times = 4} pacchetti verrà mostrato lo stato `Offline'/`Online' dell'host.
+%
+\\ Nel caso in cui non si riceva una risposta, a schermo verrà solamente stampato quanti byte sono stati inviati, oppure in casi eccezionali un messaggio di errore.
 %
 Per terminare correttamente lo script su \texttt{Windows} bisogna utilizzare la combinazione di tasti \texttt{CTRL + Break}.
 \chapter{Codice}
-Il sorgente è composto da tre sezioni principali necessarie per l'implementazione base del \texttt{ping}, che andrò ad elencare e spiegare in dettaglio.
+Il sorgente è composto da tre sezioni principali necessarie per l'implementazione base del \texttt{ping}, elencate e spiegate qui sotto in dettaglio.
 \section{\texttt{ICMPchecksum(packet)}}
 Il codice scritto in questo metodo contiene la logica di calcolo di un checksum ICMP.
 %
@@ -106,11 +106,11 @@ In questa porzione si calcola il checksum del pacchetto e lo si ricostruisce ins
   bytesSent = mySocket.sendto(packet, (destIP, 1))
   return bytesSent, sentTime
 \end{minted}
-Infine invio il pacchetto usando \texttt{socket.sendto()} e restituisco il tempo di invio e il numero di byte inviati
+Infine viene inviato il pacchetto usando \texttt{socket.sendto()} e restituito il tempo di invio e il numero di byte inviati
 \section{\texttt{receive\_reply(mySocket, myID, timeout)}}
 Questo metodo gestisce l'arrivo del pacchetto di risposta ICMP (Echo reply).
 %
-In input riceve l'oggetto \texttt{socket} su cui leggere i pacchetti, l'identificatore \texttt{myID} per verificare che il pacchetto sia nostro e il tempo di attesa \texttt{timeout}.
+In input riceve l'oggetto \texttt{socket} su cui leggere i pacchetti, l'identificatore \texttt{myID} per verificare che il pacchetto sia quello cercato e il tempo di attesa \texttt{timeout}.
 %
 \begin{minted}[linenos, breaklines]{python3}
   def receive_reply(mySocket, myID, timeout):
