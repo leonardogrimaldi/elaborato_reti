@@ -86,12 +86,19 @@ def do_one(hostName, myID, seqNumber, timeout):
             print("%d byte da %s: icmp_seq=%d ttl=%d tempo=%d ms" % (
                 dataSize, socket.inet_ntoa(struct.pack("!I", iphSrcIP)), icmpSeqNumber, iphTTL, delay)
             )
+            return True
+        else:
+            return False
 def main():
     while True:
         hostName = input("Inserisci l'indirizzo IP o hostname del destinatario.\n")
         timeout = 5 # secondi
         myID = os.getpid() & 0xFFFF  # tronca a 16 bit
         times = 4   # quante volte eseguire ping sullo stesso hostName
+        isOnline = False
         for i in range(times):
-            do_one(hostName, myID, i, timeout)
+            flag = do_one(hostName, myID, i, timeout)
+            if flag:
+                isOnline = True
+        print("Stato: ", "Online" if isOnline else "Offline")
 main()
