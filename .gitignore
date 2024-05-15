@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 *.aux
+*.toc
 *.sty
 *.fdb_latexmk
 *.fls

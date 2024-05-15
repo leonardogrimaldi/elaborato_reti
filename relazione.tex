@@ -23,7 +23,7 @@ Realizzare uno script Python per monitorare lo stato di una rete, controllando l
 %
 Lo script deve consentire all'utente di specificare gli indirizzi IP degli host da monitorare e deve visualizzare lo stato (online/offline) di ciascun host.
 \chapter{Funzionamento}
-All'avvio dello script \texttt{client.py} verrà chiesto all'utente di inserire in console l'hostname (es. \texttt{google.com}) oppure l'indirizzo IP (es. \texttt{8.8.8.8}) della macchina della quale si vuole sapere la disponibilità.
+All'avvio dello script \texttt{ping.py} verrà chiesto all'utente di inserire in console l'hostname (es. \texttt{google.com}) oppure l'indirizzo IP (es. \texttt{8.8.8.8}) della macchina della quale si vuole sapere la disponibilità.
 %
 Qualora arrivi la risposta del destinatario, si otterrà un messaggio del formato: \texttt{17 byte da 216.58.204.238: icmp\_seq=0 ttl=111 tempo=16 ms}, dove il numero di byte è dato dalla dimensione della sezione DATA (nel nostro caso \mintinline{python3}|DATA = "Buongiorno mondo!"|) e il tempo indica il delay, ovvero quanto ci ha messo a ricevere la risposta dal tempo di invio.
 %
